@@ -9,6 +9,10 @@ p {
 	margin-bottom: 1em;
 }
 
+header {
+	margin-bottom: 2em;
+}
+
 .cover-image {
 	max-width: 500px;
 	border: 1px solid lightgray;
@@ -17,6 +21,14 @@ p {
 .content {
 	max-width: 42em;
 	margin: 0 auto;
+}
+
+.block-text,
+.block-image,
+.block-quote,
+.block-video,
+.block-link {
+	margin-bottom: 1em;
 }
 
 .block-image__image {
