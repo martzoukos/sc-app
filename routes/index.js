@@ -1,53 +1,70 @@
 var express = require('express');
 var router = express.Router();
+const contentful = require('contentful');
+const fractal = require('sc-components');
+
+// Contentful
+const client = contentful.createClient({
+  space: 'x4377yw9ls2u',
+  accessToken: '008415fdeac8b6c476c4d8bfa4240ebab99c0ee027b52edcc068dc1279529ddb'
+})
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-
-	const fractal = require('sc-components');
 	fractal.load().then(() => {
-		let blocks = '';
+		client.getEntries({ 'content_type': 'pages' }).then((response) => {
+			response.items.forEach((page) => {
+				renderPage(page.fields.contentBlocks, res, page);
+			});
+		})
+	});
+});
 
-		// Block text
-	  fractal.components.render('@block-text', {
-	    text: 'Hello there'
-	  }).then(html => {
-	  	blocks = blocks + html;
-	  });
-		// Block image
-	  fractal.components.render('@block-image', {
-	    alt: 'Hello there',
-	    src: 'https://images.contentful.com/fo9twyrwpveg/5nCI6r6Z68yoq2WocomYoS/99f9985edfd1073b3936435835d6e5a1/_DSC0082.jpg'
-	  }).then(html => {
-	  	blocks = blocks + html;
-	  });
-		// Block quote
-	  fractal.components.render('@block-quote', {
-	    quote: 'A quote',
-	    cite: 'Someone'
-	  }).then(html => {
-	  	blocks = blocks + html;
-	  });
-		// Block video
-	  fractal.components.render('@block-video', {
-	    src: 'https://www.youtube.com/embed/JrcH-4wHK9w'
-	  }).then(html => {
-	  	blocks = blocks + html;
-	  });
-		// Block link
-	  fractal.components.render('@block-link', {
-	    id: '21345'
-	  }).then(html => {
-	  	blocks = blocks + html;
-	  });
+const renderPage = (blocksEndpoint, res, page) => {
+	const pageTitle = page.fields.title;
+	const coverImage = page.fields.coverImage.fields.file.url;
+	let promises = [];
 
-	  // I know, I know...
-	  setTimeout(() => {
-	  	res.render('index', { title: 'Structured Content app', html: blocks });
-	  }, 500);
+	blocksEndpoint.forEach((block) => {
+		switch(block.sys.contentType.sys.id) {
+			case "blockText":
+				promises.push(fractal.components.render('@block-text', {
+			    text: block.fields.text
+			  }));
+				break;
+			case "blockImage":
+				promises.push(fractal.components.render('@block-image', {
+			    alt: block.fields.image.fields.file.fileName,
+			    src: block.fields.image.fields.file.url
+			  }));
+				break;
+			case "blockQuote":
+				promises.push(fractal.components.render('@block-quote', {
+			    quote: block.fields.quote,
+			    cite: block.fields.cite
+			  }));
+				break;
+			case "blockVideo":
+				promises.push(fractal.components.render('@block-video', {
+			    src: block.fields.source
+			  }));
+				break;
+			case "blockLink":
+				promises.push(fractal.components.render('@block-link', {
+			    id: block.fields.page.fields.title
+			  }));
+				break;
+		};
 	});
 
-});
+	Promise.all(promises).then((contentBlocks) => {
+		res.render('index', { 
+			title: pageTitle, 
+			coverImage: coverImage,
+			contentBlocks: contentBlocks.join('') 
+		});
+	});
+};
 
 
 module.exports = router;

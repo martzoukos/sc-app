@@ -1,8 +1,24 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+	font-family: 'Signika', sans-serif;
+	font-weight: 200;
+	line-height: 1.4;
+	padding: 1em;
 }
 
-a {
-  color: #00B7FF;
+p {
+	margin-bottom: 1em;
+}
+
+.cover-image {
+	max-width: 500px;
+	border: 1px solid lightgray;
+}
+
+.content {
+	max-width: 42em;
+	margin: 0 auto;
+}
+
+.block-image__image {
+	max-width: 100%;
 }
