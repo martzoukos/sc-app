@@ -22,50 +22,65 @@ router.get('/:page', function(req, res, next) {
 		'fields.slug': req.params.page
 	})
 	.then((response) => {
-		const page = response.items[0];
-		fractal.load().then(() => {
-			renderPage(page.fields.contentBlocks, res, page);
-		});
+		if (typeof response.items[0] != 'undefined') {
+			const page = response.items[0];
+			fractal.load().then(() => {
+				renderPage(page.fields.contentBlocks, res, page);
+			});
+		} else {
+			res.status(404).send('This page doesn’t exist');
+		}
 	});
 });
 
 const renderPage = (blocksEndpoint, res, page) => {
-	const pageTitle = page.fields.title;
-	const coverImage = page.fields.coverImage.fields.file.url;
+	const pageTitle = (typeof page.fields.title != 'undefined') ? page.fields.title : 'Untitled';
+	const coverImage = setCoverImage(page);
 	let promises = [];
 
-	blocksEndpoint.forEach((block) => {
-		switch(block.sys.contentType.sys.id) {
-			case "blockText":
-				promises.push(fractal.components.render('@block-text', {
-			    text: block.fields.text
-			  }));
-				break;
-			case "blockImage":
-				promises.push(fractal.components.render('@block-image', {
-			    alt: block.fields.image.fields.file.fileName,
-			    src: block.fields.image.fields.file.url
-			  }));
-				break;
-			case "blockQuote":
-				promises.push(fractal.components.render('@block-quote', {
-			    quote: block.fields.quote,
-			    cite: block.fields.cite
-			  }));
-				break;
-			case "blockVideo":
-				promises.push(fractal.components.render('@block-video', {
-			    src: block.fields.source
-			  }));
-				break;
-			case "blockLink":
-				console.log(block.fields.page.sys.id);
-				promises.push(fractal.components.render('@block-link', {
-			    id: block.fields.page.sys.id
-			  }));
-				break;
-		};
-	});
+	if (typeof blocksEndpoint != 'undefined') {
+		blocksEndpoint.forEach((block) => {
+			switch(block.sys.contentType.sys.id) {
+				case "blockText":
+					if (typeof block.fields.text != 'undefined') {
+						promises.push(fractal.components.render('@block-text', {
+					    text: block.fields.text
+					  }));
+					}
+					break;
+				case "blockImage":
+					if (typeof block.fields.image != 'undefined') {
+						promises.push(fractal.components.render('@block-image', {
+					    alt: block.fields.image.fields.file.fileName,
+					    src: block.fields.image.fields.file.url
+					  }));	
+					}
+					break;
+				case "blockQuote":
+					if (typeof block.fields.quote != 'undefined') {
+						promises.push(fractal.components.render('@block-quote', {
+					    quote: block.fields.quote,
+					    cite: block.fields.cite
+					  }));
+					}
+					break;
+				case "blockVideo":
+					if (typeof block.fields.source != 'undefined') {
+						promises.push(fractal.components.render('@block-video', {
+					    src: block.fields.source
+					  }));
+					}
+					break;
+				case "blockLink":
+					if (typeof block.fields.page != 'undefined') {
+						promises.push(fractal.components.render('@block-link', {
+					    id: block.fields.page.sys.id
+					  }));
+					}
+					break;
+			};
+		});
+	}
 
 	Promise.all(promises).then((contentBlocks) => {
 		res.render('page', { 
@@ -74,6 +89,15 @@ const renderPage = (blocksEndpoint, res, page) => {
 			contentBlocks: contentBlocks.join('') 
 		});
 	});
+};
+
+const setCoverImage = (page) => {
+	if (typeof page.fields.coverImage != 'undefined') {
+		if (typeof page.fields.coverImage.fields.file != 'undefined')
+			return page.fields.coverImage.fields.file.url;
+	} else {
+		return '//images.contentful.com/fo9twyrwpveg/1lijLvZpUMk8wSi60w6Wg8/82e1815d6c12b16b67f45c0167ba51e6/DeveloperPortal.png';
+	};
 };
 
 module.exports = router;
