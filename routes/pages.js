@@ -40,45 +40,47 @@ const renderPage = (blocksEndpoint, res, page) => {
 
 	if (typeof blocksEndpoint != 'undefined') {
 		blocksEndpoint.forEach((block) => {
-			switch(block.sys.contentType.sys.id) {
-				case "blockText":
-					if (typeof block.fields.text != 'undefined') {
-						promises.push(fractal.components.render('@block-text', {
-					    text: block.fields.text
-					  }));
-					}
-					break;
-				case "blockImage":
-					if (typeof block.fields.image != 'undefined') {
-						promises.push(fractal.components.render('@block-image', {
-					    alt: block.fields.image.fields.file.fileName,
-					    src: block.fields.image.fields.file.url
-					  }));	
-					}
-					break;
-				case "blockQuote":
-					if (typeof block.fields.quote != 'undefined') {
-						promises.push(fractal.components.render('@block-quote', {
-					    quote: block.fields.quote,
-					    cite: block.fields.cite
-					  }));
-					}
-					break;
-				case "blockVideo":
-					if (typeof block.fields.source != 'undefined') {
-						promises.push(fractal.components.render('@block-video', {
-					    src: block.fields.source
-					  }));
-					}
-					break;
-				case "blockLink":
-					if (typeof block.fields.page != 'undefined') {
-						promises.push(fractal.components.render('@block-link', {
-					    id: block.fields.page.sys.id
-					  }));
-					}
-					break;
-			};
+			if (typeof block.sys.contentType != 'undefined') {
+				switch(block.sys.contentType.sys.id) {
+					case "blockText":
+						if (typeof block.fields.text != 'undefined') {
+							promises.push(fractal.components.render('@block-text', {
+						    text: block.fields.text
+						  }));
+						}
+						break;
+					case "blockImage":
+						if (typeof block.fields.image != 'undefined') {
+							promises.push(fractal.components.render('@block-image', {
+						    alt: block.fields.image.fields.file.fileName,
+						    src: block.fields.image.fields.file.url
+						  }));	
+						}
+						break;
+					case "blockQuote":
+						if (typeof block.fields.quote != 'undefined') {
+							promises.push(fractal.components.render('@block-quote', {
+						    quote: block.fields.quote,
+						    cite: block.fields.cite
+						  }));
+						}
+						break;
+					case "blockVideo":
+						if (typeof block.fields.source != 'undefined') {
+							promises.push(fractal.components.render('@block-video', {
+						    src: block.fields.source
+						  }));
+						}
+						break;
+					case "blockLink":
+						if (typeof block.fields.page != 'undefined') {
+							promises.push(fractal.components.render('@block-link', {
+						    id: block.fields.page.sys.id
+						  }));
+						}
+						break;
+				};
+			}
 		});
 	}
 
