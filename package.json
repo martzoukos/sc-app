@@ -6,16 +6,21 @@
     "start": "nodemon ./bin/www"
   },
   "dependencies": {
+    "@contentful/structured-text-html-serializer": "^2.1.0",
     "@frctl/fractal": "^1.1.7",
     "body-parser": "~1.17.1",
     "contentful": "^4.6.2",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.3",
-    "express": "~4.15.2",
+    "express": "^4.15.5",
     "hbs": "~4.0.1",
     "morgan": "~1.8.1",
     "nodemon": "^1.12.1",
     "sc-components": "https://github.com/martzoukos/sc-components.git",
     "serve-favicon": "~2.4.2"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0"
   }
 }

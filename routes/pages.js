@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 const fractal = require('sc-components');
 const client = require('../contentful-client.js');
+import { documentToHtmlString } from '@contentful/structured-text-html-serializer';
+
 
 // Pages index
 router.get('/', function(req, res, next) {
@@ -84,11 +86,18 @@ const renderPage = (blocksEndpoint, res, page) => {
 		});
 	}
 
+	const options = {
+	  renderNode: {
+	    [PARAGRAPH]: (node, next) => `<p class="custom">${next(node.content)}</p>`
+	  }
+	}
+
 	Promise.all(promises).then((contentBlocks) => {
 		res.render('page', { 
 			title: pageTitle, 
 			coverImage: coverImage,
-			contentBlocks: contentBlocks.join('') 
+			// contentBlocks: contentBlocks.join('') 
+			contentBlocks: documentToHtmlString(page.fields.structuredText)
 		});
 	});
 };
