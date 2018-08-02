@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const fractal = require('sc-components');
 const client = require('../contentful-client.js');
+import { BLOCKS } from '@contentful/structured-text-types';
 import { documentToHtmlString } from '@contentful/structured-text-html-serializer';
 
 
@@ -21,7 +22,8 @@ router.get('/', function(req, res, next) {
 router.get('/:page', function(req, res, next) {
 	client.getEntries({
 		content_type: 'pages',
-		'fields.slug': req.params.page
+		'fields.slug': req.params.page,
+		include: 10
 	})
 	.then((response) => {
 		if (typeof response.items[0] != 'undefined') {
@@ -88,16 +90,19 @@ const renderPage = (blocksEndpoint, res, page) => {
 
 	const options = {
 	  renderNode: {
-	    [PARAGRAPH]: (node, next) => `<p class="custom">${next(node.content)}</p>`
+	    [BLOCKS.EMBEDDED_ENTRY]: (node) => {
+	    	return `<div class='custom' style='padding: 1em; background-color: #EEE;'>
+	    			${JSON.stringify(node)}
+	    		</div>`
+	    }
 	  }
 	}
 
 	Promise.all(promises).then((contentBlocks) => {
 		res.render('page', { 
 			title: pageTitle, 
-			coverImage: coverImage,
-			// contentBlocks: contentBlocks.join('') 
-			contentBlocks: documentToHtmlString(page.fields.structuredText)
+			coverImage: coverImage, 
+			structuredContent: documentToHtmlString(page.fields.structuredText, options)
 		});
 	});
 };
